@@ -5,8 +5,6 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_18",
   "mixins": [
-    "accessors.StructureGenerationContextAccessor",
-    "accessors.StructureSettingsAccessor",
     "generation.MixinStructureTemplateManager"
   ],
   "client": [
