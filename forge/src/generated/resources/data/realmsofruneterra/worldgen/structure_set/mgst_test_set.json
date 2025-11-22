@@ -1,0 +1,23 @@
+{
+  "placement": {
+    "type": "realmsofruneterra:runeterra_single_placement_type",
+    "full_bounding_box": {
+      "blockHeight": 1,
+      "maxChunk": [
+        763,
+        401
+      ],
+      "minChunk": [
+        762,
+        400
+      ]
+    },
+    "salt": 1
+  },
+  "structures": [
+    {
+      "structure": "realmsofruneterra:mgst_test",
+      "weight": 1
+    }
+  ]
+}

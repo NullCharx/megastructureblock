@@ -1,0 +1,13 @@
+{
+  "type": "realmsofruneterra:buffer_void_dimension_type",
+  "generator": {
+    "type": "realmsofruneterra:void_generator",
+    "baseSettings": "realmsofruneterra:runic_bugffer_genset0",
+    "biome_source": {
+      "biomeGroups": {
+        "default": "realmsofruneterra:m_default_void"
+      }
+    },
+    "settings": "realmsofruneterra:bufferdim_test"
+  }
+}

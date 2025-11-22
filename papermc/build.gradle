@@ -1,0 +1,65 @@
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
+
+plugins {
+    id 'multiloader-loader'
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.14'
+}
+
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+}
+// https://docs.papermc.io/paper/dev/userdev
+paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
+
+dependencies {
+    //compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
+    // paperweight.foliaDevBundle("1.21.4-R0.1-SNAPSHOT")
+    // paperweight.devBundle("com.example.paperfork", "1.21.4-R0.1-SNAPSHOT")
+    implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.20.0' // For voronoi maps
+}
+
+def targetJavaVersion = 21
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+
+    // Use fileTree and exclude properly
+    source = fileTree('src/main/java').exclude('**/es/nullbyte/realmsofruneterra/client/**', '**/es/nullbyte/realmsofruneterra/mixin/**')
+}
+
+tasks.named('javadoc', Javadoc).configure {
+
+    // Exclude the same folders from javadoc task
+    source = fileTree('src/main/java').exclude('**/es/nullbyte/realmsofruneterra/client/**', '**/es/nullbyte/realmsofruneterra/mixin/**')
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}

@@ -1,0 +1,28 @@
+REMEMBER: ALPHA VERSIONS ARE UNSTABLE.
+PLEASE REPORT ANY CASE OF THE FOLLOWING IMMEDIATELY VIA THE ISSUE TRACKER:
+DANGLING THREADS: Memory optimizing threads might not properly clean, thus residing in memory even after the game is closed
+MEMORY LEAK: Please report any RAM over usage: Expected RAM usage for the mod at this point is no more than 5-6GB.
+You can force quit any dangling thread on the task manager.
+A memory leak can be fixed by restarting your computer.
+
+If you encounter any issue, please post it in the issue tracker
+
+- Added four test blocks under "piltover items" (provisonal creative tab name)
+    - Piltite ore block: Natural block spawning north piltover. (Worldgen not implemented yet). When mined it drops:
+    - Raw piltite chunk item: Needs of an unimplemented block to create:
+    - Refined piltite block: Needs of an unimplemented block to create:
+    - Base piltstone block: Northern piltover prominent decoration block.
+
+- Slightly altered world generation block filling to complete asynchronously.
+    - World might take up to 15% more time to load on the first teleport /  when spawning into an area with fully undiscovered
+    chunks, but it makes up for it being up to +40% faster loading new chunks.
+
+- Added alpha biome assigment system:
+    - Reads from a biomemap to set a biome or a group of biomes. If a group of biomes is present, it resorts to vanilla
+    bione noise assigment for a natural look.
+
+- Memory optimizations:
+    -Map caches will evict the least recently used slice if full (4 images)
+    -Changes both the heightmap cache and the biomemap cache so that slices not used within the last five minutes
+    will be concurrently removed by a thread.
+    -This should help alliveate bloaty memory usage

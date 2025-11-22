@@ -1,0 +1,14 @@
+{
+  "type": "realmsofruneterra:megastructure_type",
+  "biomes": "realmsofruneterra:northern_piltover_base",
+  "cornerReference": [
+    12200,
+    1,
+    6400
+  ],
+  "megastructureHeader": "realmsofruneterra:mgst_test",
+  "permittedBiomeGroups": "realmsofruneterra:m_default",
+  "project_start_to_heightmap": "WORLD_SURFACE",
+  "spawn_overrides": {},
+  "step": "surface_structures"
+}

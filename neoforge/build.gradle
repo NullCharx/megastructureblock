@@ -1,0 +1,87 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+neoForge {
+    version = neoforge_version
+    // Automatically enable neoforge AccessTransformers if the file exists
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
+    runs {
+        configureEach {
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+        }
+        client {
+            client()
+        }
+        data {
+            clientData()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+
+        }
+        server {
+            server()
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+dependencies {
+    // JTS for geometry and spatial tools
+    jarJar(implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.20.0') {
+        version {
+            strictly '[1.20.0]'
+        }
+    }
+    additionalRuntimeClasspath (group: 'org.locationtech.jts', name: 'jts-core', version: '1.20.0')
+
+    // JGraphT for graph algorithms
+    jarJar(implementation 'org.jgrapht:jgrapht-core:1.5.2'){
+        version {
+            strictly '[1.5.2]'
+        }
+    }
+    additionalRuntimeClasspath "org.jgrapht:jgrapht-core:1.5.2"
+
+    jarJar(implementation 'org.jgrapht:jgrapht-io:1.5.2') {
+        version {
+            strictly '[1.5.2]'
+        }
+    }
+    additionalRuntimeClasspath "org.jgrapht:jgrapht-io:1.5.2"
+
+    jarJar(implementation 'org.graphstream:gs-core:2.0'){
+        version {
+            strictly '[2.0]'
+        }
+    }
+    additionalRuntimeClasspath "org.graphstream:gs-core:2.0"
+
+    jarJar(implementation 'org.graphstream:gs-ui-swing:2.0') {
+        version {
+            strictly '[2.0]'
+        }
+    }
+    additionalRuntimeClasspath "org.graphstream:gs-ui-swing:2.0"
+
+    jarJar(implementation('org.graphstream:gs-algo:2.0')) {
+        version {
+            strictly '[2.0]'
+        }
+    }
+    additionalRuntimeClasspath ("org.graphstream:gs-algo:2.0"){
+        exclude group: 'xml-apis', module: 'xml-apis'
+    }
+}
+sourceSets.main.resources { srcDir 'src/generated/resources'}

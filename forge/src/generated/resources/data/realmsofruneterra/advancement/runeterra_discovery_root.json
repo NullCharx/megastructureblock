@@ -1,0 +1,29 @@
+{
+  "criteria": {
+    "is_in_runeterra": {
+      "conditions": {
+        "to": "realmsofruneterra:runeterra_dimension"
+      },
+      "trigger": "minecraft:changed_dimension"
+    }
+  },
+  "display": {
+    "background": "realmsofruneterra:textures/block/piltite_ore.png",
+    "description": {
+      "translate": "advancements.realmsofruneterra.discovery.welcome.toast"
+    },
+    "icon": {
+      "count": 1,
+      "id": "realmsofruneterra:piltite_ore"
+    },
+    "title": {
+      "translate": "advancements.realmsofruneterra.discovery.welcome.title"
+    }
+  },
+  "requirements": [
+    [
+      "is_in_runeterra"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

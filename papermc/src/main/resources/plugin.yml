@@ -1,0 +1,13 @@
+name: RealmsofRuneterra
+version: '0.1a.7'
+main: es.nullbyte.realmsofruneterra.RealmsOfRuneterra
+description: Explore the world of Runeterra in Minecraf
+authors: [NullByte, NullCollective]
+contributors: []
+website: Cooming soon!
+api-version: '1.21.4'
+load: STARTUP
+libraries:
+  - org.locationtech.jts:jts-core:1.20.0
+depend: []
+softdepend: []

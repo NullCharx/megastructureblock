@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "realmsofruneterra:block/ancient_runic_hardened_mineral"
+  }
+}

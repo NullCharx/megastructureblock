@@ -1,0 +1,11 @@
+{
+  "biomeGroup": "realmsofruneterra:gmix_defaut_oceans",
+  "layoutData": {
+    "connectivity": 0.7,
+    "style": "TRUE_RANDOM"
+  },
+  "pois": {
+    "realmsofruneterra:mgst_test100_set": "realmsofruneterra:mgst_test100_set",
+    "realmsofruneterra:mgst_test_set": "realmsofruneterra:mgst_test_set"
+  }
+}

@@ -1,0 +1,6 @@
+// 1.21.4	2025-01-22T23:45:25.30068	Block Tags
+15e3ccc0754de875aa86c10aa6bbce2094095f17 data/minecraft/tags/block/mineable/pickaxe.json
+fbebdcb0640c1b872baf4f2202dd0e7b8ae19938 data/minecraft/tags/block/needs_diamond_tool.json
+15e3ccc0754de875aa86c10aa6bbce2094095f17 data/minecraft/tags/block/needs_iron_tool.json
+f90fd9234d14df293bbcc90a28512e7e904379d5 data/realmsofruneterra/tags/block/buffer_runic_dim.json
+15e3ccc0754de875aa86c10aa6bbce2094095f17 data/realmsofruneterra/tags/block/piltover_block.json

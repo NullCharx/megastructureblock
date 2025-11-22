@@ -1,0 +1,3 @@
+[submodule "relative-dimensions-assets"]
+	path = relative-dimensions-assets
+	url = git@github.com:nullcharx/relative-dimensions-assets.git

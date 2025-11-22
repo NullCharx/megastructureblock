@@ -1,0 +1,6 @@
+{
+  "custom_noise_router": {
+    "corridor_density": 0.42069,
+    "room_density": 0.314
+  }
+}
