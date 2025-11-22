@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "realmsofruneterra:item/raw_piltite_chunk"
-  }
-}

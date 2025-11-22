@@ -1,6 +1,6 @@
 name: RealmsofRuneterra
 version: '0.1a.7'
-main: es.nullbyte.megastructureblock.RealmsOfRuneterra
+main: es.nullbyte.megastructureblock.MegaStructureBlock
 description: Explore the world of Runeterra in Minecraf
 authors: [NullByte, NullCollective]
 contributors: []

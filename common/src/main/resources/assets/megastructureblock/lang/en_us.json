@@ -1,0 +1,11 @@
+{
+  "title": "Megastructureblock",
+
+  "block.megastructureblock.megastructureblock": "megastructure block",
+  "megastructure_block.mode_info.relative_autohcunk_save": "Relative chunk pos save mode",
+  "megastructure_block.mode_info.absolute_autohcunk_save": "Absolute chunk pos save mode",
+  "megastructure_block.mode_info.autochunk_save": "Auto chunk pos save mode",
+  "megastructure_block.mode_info.load": "Load mode",
+  "megastructure_block.mode_info.corner": "Primary delimiter mode",
+  "megastructure_block.mode_info.data": "Default data mode"
+}
