@@ -39,51 +39,6 @@ neoForge {
     }
 }
 dependencies {
-    // JTS for geometry and spatial tools
-    jarJar(implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.20.0') {
-        version {
-            strictly '[1.20.0]'
-        }
-    }
-    additionalRuntimeClasspath (group: 'org.locationtech.jts', name: 'jts-core', version: '1.20.0')
-
-    // JGraphT for graph algorithms
-    jarJar(implementation 'org.jgrapht:jgrapht-core:1.5.2'){
-        version {
-            strictly '[1.5.2]'
-        }
-    }
-    additionalRuntimeClasspath "org.jgrapht:jgrapht-core:1.5.2"
-
-    jarJar(implementation 'org.jgrapht:jgrapht-io:1.5.2') {
-        version {
-            strictly '[1.5.2]'
-        }
-    }
-    additionalRuntimeClasspath "org.jgrapht:jgrapht-io:1.5.2"
-
-    jarJar(implementation 'org.graphstream:gs-core:2.0'){
-        version {
-            strictly '[2.0]'
-        }
-    }
-    additionalRuntimeClasspath "org.graphstream:gs-core:2.0"
-
-    jarJar(implementation 'org.graphstream:gs-ui-swing:2.0') {
-        version {
-            strictly '[2.0]'
-        }
-    }
-    additionalRuntimeClasspath "org.graphstream:gs-ui-swing:2.0"
-
-    jarJar(implementation('org.graphstream:gs-algo:2.0')) {
-        version {
-            strictly '[2.0]'
-        }
-    }
-    additionalRuntimeClasspath ("org.graphstream:gs-algo:2.0"){
-        exclude group: 'xml-apis', module: 'xml-apis'
-    }
 }
 sourceSets.main.resources { srcDir 'src/generated/resources'}
 
@@ -91,8 +46,8 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = "es.nullbyte.megastructureblock"
-            artifactId = "msb-${minecraft_version}-neoforge"
-            version = "${project.version}"
+            artifactId = "msb-neoforge-${minecraft_version}"
+            version = "$version".trim()
         }
     }
 

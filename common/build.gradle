@@ -25,16 +25,6 @@ dependencies {
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 
-    // JTS for geometry and spatial tools
-    implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.20.0' //For voronoi maps
-    // JGraphT for graph algorithms
-    implementation 'org.jgrapht:jgrapht-core:1.5.2'
-    implementation 'org.jgrapht:jgrapht-io:1.5.2'
-
-    //gs-ui usa Swing y puede causar conflictos si se ejecuta dentro del entorno de Minecraft.
-    implementation 'org.graphstream:gs-core:2.0'
-    implementation 'org.graphstream:gs-algo:2.0'
-    implementation 'org.graphstream:gs-ui-swing:2.0'
 }
 
 configurations {
