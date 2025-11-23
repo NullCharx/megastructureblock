@@ -46,7 +46,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = "es.nullbyte.megastructureblock"
-            artifactId = "neoforge"
+            artifactId = "${minecraft_version}-neoforge"
             version = "${version}"
         }
     }
