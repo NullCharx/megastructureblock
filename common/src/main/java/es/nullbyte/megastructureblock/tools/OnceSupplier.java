@@ -1,4 +1,4 @@
-package es.nullbyte.nullutils;
+package es.nullbyte.megastructureblock.tools;
 
 import java.util.function.Supplier;
 

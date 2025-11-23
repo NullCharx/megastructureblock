@@ -1,4 +1,4 @@
-package es.nullbyte.nullutils;
+package es.nullbyte.megastructureblock.tools;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

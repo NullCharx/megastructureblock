@@ -46,11 +46,10 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = "es.nullbyte.megastructureblock"
-            artifactId = "msb-neoforge-${minecraft_version}"
-            version = "$version".trim()
+            artifactId = "neoforge"
+            version = "${version}"
         }
     }
-
     repositories {
         maven {
             name = "GitHubPackages"
@@ -61,9 +60,9 @@ publishing {
             }
         }
     }
-    //publications {
-    //    gpr(MavenPublication) {
-    //        from(components.java)
-    //    }
-    //}
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
 }

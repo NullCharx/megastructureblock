@@ -1,6 +1,6 @@
 package es.nullbyte.megastructureblock.blocks.blockentities;
 
-import es.nullbyte.nullutils.OnceSupplier;
+import es.nullbyte.megastructureblock.tools.OnceSupplier;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 import java.util.function.Supplier;

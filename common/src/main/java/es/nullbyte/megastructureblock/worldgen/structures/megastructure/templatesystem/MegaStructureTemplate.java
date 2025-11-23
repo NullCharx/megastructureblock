@@ -1,7 +1,7 @@
 package es.nullbyte.megastructureblock.worldgen.structures.megastructure.templatesystem;
 
 import com.google.common.annotations.VisibleForTesting;
-import es.nullbyte.nullutils.AxisAlignedChunkArea;
+import es.nullbyte.megastructureblock.tools.AxisAlignedChunkArea;
 import net.minecraft.core.*;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
