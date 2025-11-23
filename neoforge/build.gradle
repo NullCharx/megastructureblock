@@ -1,6 +1,7 @@
 plugins {
     id 'multiloader-loader'
     id 'net.neoforged.moddev'
+    id 'maven-publish'
 }
 
 neoForge {
@@ -85,3 +86,29 @@ dependencies {
     }
 }
 sourceSets.main.resources { srcDir 'src/generated/resources'}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = "es.nullbyte.megastructureblock"
+            artifactId = "msb-${minecraft_version}-neoforge"
+            version = "${project.version}"
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/NullCharx/megastructureblock")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    //publications {
+    //    gpr(MavenPublication) {
+    //        from(components.java)
+    //    }
+    //}
+}
