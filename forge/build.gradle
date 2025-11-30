@@ -27,20 +27,10 @@ minecraft {
     // This location is hardcoded in Forge and can not be changed.
     // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
     // Forge still uses SRG names during compile time, so we cannot use the common AT's
-    //def at = file('src/main/resources/META-INF/accesstransformer.cfg')
-    //if (at.exists()) {
-    //    accessTransformer = at
-    //}
-    def localAt = file('src/main/resources/META-INF/accesstransformer.cfg')
-    def commonAt = file("${rootDir}/common/src/main/resources/META-INF/accesstransformer.cfg")
-
-// Check if the local file exists first, then the common one if not
-    if (localAt.exists()) {
-        accessTransformer = localAt
-    } else if (commonAt.exists()) {
-        accessTransformer = commonAt
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformer = at
     }
-
 
     runs {
         client {
@@ -83,24 +73,10 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    //annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
-    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
-    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.4.1")) {
-        jarJar.ranged(it, "[0.4.1,)")
-    }
+    annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
+
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
-
-    // JTS for geometry and spatial tools
-    implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.20.0' //For voronoi maps
-    // JGraphT for graph algorithms
-    implementation 'org.jgrapht:jgrapht-core:1.5.2'
-    implementation 'org.jgrapht:jgrapht-io:1.5.2'
-
-    //gs-ui usa Swing y puede causar conflictos si se ejecuta dentro del entorno de Minecraft.
-    implementation 'org.graphstream:gs-core:2.0'
-    //implementation 'org.graphstream:gs-algo:2.0'
-    implementation 'org.graphstream:gs-ui-swing:2.0'
 }
 
 publishing {

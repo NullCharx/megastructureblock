@@ -38,8 +38,7 @@ neoForge {
         }
     }
 }
-dependencies {
-}
+
 sourceSets.main.resources { srcDir 'src/generated/resources'}
 
 publishing {

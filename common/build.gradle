@@ -2,30 +2,7 @@ plugins {
     id 'multiloader-common'
     id 'net.neoforged.moddev'
 }
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = "es.nullbyte.megastructureblock"
-            artifactId = "${minecraft_version}-common"
-            version = "${version}"
-        }
-    }
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/NullCharx/megastructureblock")
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
-    publications {
-        gpr(MavenPublication) {
-            from(components.java)
-        }
-    }
-}
+
 
 neoForge {
     neoFormVersion = neo_form_version
@@ -40,15 +17,12 @@ neoForge {
     }
 }
 
+
 dependencies {
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.4.1'
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.4.1'
-
-    // Forge's hack fix
-    implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
-
 }
 
 configurations {
@@ -62,9 +36,7 @@ configurations {
     }
 }
 
-
 artifacts {
     commonJava sourceSets.main.java.sourceDirectories.singleFile
     commonResources sourceSets.main.resources.sourceDirectories.singleFile
 }
-
