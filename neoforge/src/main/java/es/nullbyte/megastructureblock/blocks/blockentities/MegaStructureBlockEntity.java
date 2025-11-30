@@ -24,11 +24,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BoundingBoxRenderable;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -53,34 +56,35 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
     public static final int MAX_SIZE_PER_AXIS = MAX_OFFSET_PER_AXIS*2;
     public static final String AUTHOR_TAG = "author";
     public static final String MEGASTRUCTURE_PREFIX = "mgst_";
+    private static final BlockPos DEFAULT_POS = new BlockPos(0, 1, 0);
+    private static final Vec3i DEFAULT_SIZE = Vec3i.ZERO;
+    private static final Rotation DEFAULT_ROTATION = Rotation.NONE;
+    private static final Mirror DEFAULT_MIRROR = Mirror.NONE;
 
     @Nullable
     private ResourceLocation structureName;
     private String author = "";
     private String metaData = "";
-    private BlockPos structurePos = new BlockPos(0, 1, 0);
-    private Vec3i structureSize;
-    private Mirror mirror;
-    private Rotation rotation;
+    private BlockPos structurePos = DEFAULT_POS;
+    private Vec3i structureSize = DEFAULT_SIZE;
+    private Mirror mirror = Mirror.NONE;
+    private Rotation rotation = Rotation.NONE;
     private MegaStructureMode mode;
-    private boolean ignoreEntities;
-    private boolean powered;
-    private boolean showAir;
-    private boolean showBoundingBox;
-    private float integrity;
-    private long seed;
+    private boolean ignoreEntities = true;
+    private boolean strict = false;
+    private boolean powered = false;
+    private boolean showAir = false;
+    private boolean showBoundingBox = true;
+    private float integrity = 1.0F;
+    private long seed = 0L;
     private final BlockPos absolutePositioning = new BlockPos(0, 0, 0);
 
     public MegaStructureBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntityDefintions.MEGASTRUCTURE_BLOCK_ENTITY.get(), pos, blockState);
-        this.structureSize = Vec3i.ZERO;
-        this.mirror = Mirror.NONE;
-        this.rotation = Rotation.NONE;
-        this.ignoreEntities = true;
-        this.showBoundingBox = true;
-        this.integrity = 1.0F;
         this.mode = blockState.getValue(MegaStructureBlock.MODE);
     }
+
+
 
     //https://github.com/neoforged/.github/blob/main/primers/1.21.6/index.md
     @Override
@@ -108,47 +112,38 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
     }
 
     @Override
-    protected void loadAdditional(ValueInput in) {
-        super.loadAdditional(in);
-        this.setStructureName(in.getStringOr("name",""));
-        this.author = in.getStringOr("author","");
-        this.metaData = in.getStringOr("metadata","");
-        int i = Mth.clamp(in.getIntOr("posX",420), -MAX_OFFSET_PER_AXIS, MAX_OFFSET_PER_AXIS);
-        int j = Mth.clamp(in.getIntOr("posY",-69), -MAX_OFFSET_PER_AXIS, MAX_OFFSET_PER_AXIS);
-        int k = Mth.clamp(in.getIntOr("posZ", 777), -MAX_OFFSET_PER_AXIS, MAX_OFFSET_PER_AXIS);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        this.setStructureName(input.getStringOr("name",""));
+        this.author = input.getStringOr("author","");
+        this.metaData = input.getStringOr("metadata","");
+        int i = Mth.clamp(input.getIntOr("posX",420), -MAX_OFFSET_PER_AXIS, MAX_OFFSET_PER_AXIS);
+        int j = Mth.clamp(input.getIntOr("posY",-69), -MAX_OFFSET_PER_AXIS, MAX_OFFSET_PER_AXIS);
+        int k = Mth.clamp(input.getIntOr("posZ", 777), -MAX_OFFSET_PER_AXIS, MAX_OFFSET_PER_AXIS);
         this.structurePos = new BlockPos(i, j, k);
-        int l = Mth.clamp(in.getIntOr("sizeX",13), 0, MAX_SIZE_PER_AXIS);
-        int i1 = Mth.clamp(in.getIntOr("sizeY",5), 0, MAX_SIZE_PER_AXIS);
-        int j1 = Mth.clamp(in.getIntOr("sizeZ",8), 0, MAX_SIZE_PER_AXIS);
+        int l = Mth.clamp(input.getIntOr("sizeX",13), 0, MAX_SIZE_PER_AXIS);
+        int i1 = Mth.clamp(input.getIntOr("sizeY",5), 0, MAX_SIZE_PER_AXIS);
+        int j1 = Mth.clamp(input.getIntOr("sizeZ",8), 0, MAX_SIZE_PER_AXIS);
         this.structureSize = new Vec3i(l, i1, j1);
 
+        this.rotation = input.read("rotation", Rotation.LEGACY_CODEC).orElse(DEFAULT_ROTATION);
+        this.mirror = input.read("mirror", Mirror.LEGACY_CODEC).orElse(DEFAULT_MIRROR);
         try {
-            this.rotation = Rotation.valueOf(in.getStringOr("rotation",""));
-        } catch (IllegalArgumentException var12) {
-            this.rotation = Rotation.NONE;
-        }
-
-        try {
-            this.mirror = Mirror.valueOf(in.getStringOr("mirror",""));
-        } catch (IllegalArgumentException var11) {
-            this.mirror = Mirror.NONE;
-        }
-
-        try {
-            this.mode = MegaStructureMode.valueOf(in.getStringOr("mode",""));
+            this.mode = MegaStructureMode.valueOf(input.getStringOr("mode",""));
         } catch (IllegalArgumentException var10) {
             this.mode = MegaStructureMode.DATA;
         }
 
-        this.ignoreEntities = in.getBooleanOr("ignoreEntities",true);
-        this.powered = in.getBooleanOr("powered",false);
-        this.showAir = in.getBooleanOr("showair",false);
-        this.showBoundingBox = in.getBooleanOr("showboundingbox", true);
+        this.ignoreEntities = input.getBooleanOr("ignoreEntities",true);
+        this.strict = input.getBooleanOr("strict", false);
+        this.powered = input.getBooleanOr("powered",false);
+        this.showAir = input.getBooleanOr("showair",false);
+        this.showBoundingBox = input.getBooleanOr("showboundingbox", true);
 
-        float integrityf = in.getFloatOr("integrity",Float.MIN_VALUE);
+        float integrityf = input.getFloatOr("integrity",Float.MIN_VALUE);
         this.integrity = integrityf != Float.MIN_VALUE ? integrityf : 1.0F;
 
-        this.seed = in.getLongOr("seed",1);
+        this.seed = input.getLongOr("seed",0L);
         this.updateBlockState();
     }
 
@@ -167,15 +162,15 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        return this.saveCustomOnly(provider);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveCustomOnly(registries);
     }
 
     public boolean usedBy(Player player) {
         if (!player.canUseGameMasterBlocks()) {
             return false;
         } else {
-            if (level.isClientSide) {
+            if (level.isClientSide()) {
                 ClientScreens.openMegaStructureBlockSreen(this);
             }
             return true;
@@ -309,9 +304,8 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
             return false;
         } else {
             BlockPos blockpos = this.getBlockPos();
-            int i = 512;
-            BlockPos blockpos1 = new BlockPos(blockpos.getX() - 80, this.level.getMinY(), blockpos.getZ() - 80);
-            BlockPos blockpos2 = new BlockPos(blockpos.getX() + 80, this.level.getMaxY(), blockpos.getZ() + 80);
+            BlockPos blockpos1 = new BlockPos(blockpos.getX() - MAX_OFFSET_PER_AXIS, this.level.getMinY(), blockpos.getZ() - MAX_OFFSET_PER_AXIS);
+            BlockPos blockpos2 = new BlockPos(blockpos.getX() + MAX_OFFSET_PER_AXIS, this.level.getMaxY(), blockpos.getZ() + MAX_OFFSET_PER_AXIS);
             Stream<BlockPos> stream = this.getRelatedCorners(blockpos1, blockpos2);
             return calculateEnclosingBoundingBox(blockpos, stream).filter((p_155790_) -> {
                 int j = p_155790_.maxX() - p_155790_.minX();
@@ -333,20 +327,33 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
 
 
     private Stream<BlockPos> getRelatedCorners(BlockPos minPos, BlockPos maxPos) {
-        // Stream of block positions in the specified range
-        Stream<BlockPos> var10000 = BlockPos.betweenClosedStream(minPos, maxPos)
-                .filter(p_272561_ -> this.level.getBlockState(p_272561_).is(ModBlockDefintions.MEGASTRUCTURE_BLOCK.get()));
-
         Level level = this.level;
-        Objects.requireNonNull(level);
 
-        // Fixing the ambiguity by using a lambda expression
-        return var10000.map(level::getBlockEntity)  // Explicitly reference getBlockEntity with BlockPos
-                .filter(blockEntity -> blockEntity instanceof MegaStructureBlockEntity) // Filter for MegaStructureBlockEntity
-                .map(p_155785_ -> (MegaStructureBlockEntity) p_155785_) // Cast to MegaStructureBlockEntity
-                .filter(blockEntity -> blockEntity.mode == MegaStructureMode.CRNR && Objects.equals(this.structureName, blockEntity.structureName)) // Additional filtering
-                .map(BlockEntity::getBlockPos); // Map to BlockPos
+        return BlockPos.betweenClosedStream(minPos, maxPos)
+                .filter(pos -> level.getBlockState(pos).is(ModBlockDefintions.MEGASTRUCTURE_BLOCK.get()))
+                .map(level::getBlockEntity)
+                .filter(be -> be instanceof MegaStructureBlockEntity)
+                .map(be -> (MegaStructureBlockEntity) be)
+                .filter(be -> be.mode == MegaStructureMode.CRNR
+                        && Objects.equals(this.structureName, be.structureName))
+                .map(BlockEntity::getBlockPos);
     }
+
+//    private Stream<BlockPos> getRelatedCorners(BlockPos minPos, BlockPos maxPos) {
+//        // Stream of block positions in the specified range
+//        Stream<BlockPos> var10000 = BlockPos.betweenClosedStream(minPos, maxPos)
+//                .filter(p_272561_ -> this.level.getBlockState(p_272561_).is(ModBlockDefintions.MEGASTRUCTURE_BLOCK.get()));
+//
+//        Level level = this.level;
+//        Objects.requireNonNull(level);
+//
+//        // Fixing the ambiguity by using a lambda expression
+//        return var10000.map(level::getBlockEntity)  // Explicitly reference getBlockEntity with BlockPos
+//                .filter(blockEntity -> blockEntity instanceof MegaStructureBlockEntity) // Filter for MegaStructureBlockEntity
+//                .map(p_155785_ -> (MegaStructureBlockEntity) p_155785_) // Cast to MegaStructureBlockEntity
+//                .filter(blockEntity -> blockEntity.mode == MegaStructureMode.CRNR && Objects.equals(this.structureName, blockEntity.structureName)) // Additional filtering
+//                .map(BlockEntity::getBlockPos); // Map to BlockPos
+//    }
 
 
     private static Optional<BoundingBox> calculateEnclosingBoundingBox(BlockPos pos, Stream<BlockPos> relatedCorners) {
@@ -368,101 +375,102 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
     }
 
     public boolean saveStructure() {
-        return saveStructure(true);
+        return this.mode == MegaStructureMode.SAVE && this.saveStructure(true);
     }
 
     public boolean saveStructure(boolean write) {
-        if  (this.mode == MegaStructureMode.SAVE) {
-            return this.saveMegaStructure(write);
+
+        if (this.structureName != null && this.level instanceof ServerLevel serverlevel) {
+            BlockPos blockpos = this.getBlockPos().offset(this.structurePos);
+            return saveMegaStructure(serverlevel, this.structureName, blockpos, this.structureSize, this.ignoreEntities, this.author, write, List.of());
         } else {
             return false;
-        }
+}
     }
+
+    @Override
+    public boolean saveMegaStructure(boolean writeToDisk) {
+        return saveStructure(writeToDisk);
+    }
+
     /**
      *
      * Here we do not care about the logic of positioning the megastructure in the world. Here we just need to
      * serialize the megastructure into constitutent chunks.
-     * @param writeToDisk
-     * @return
      */
-    public boolean saveMegaStructure(boolean writeToDisk) {
-        if (this.structureName == null) {
-            return false;
-        } else {
-            BlockPos blockpos = this.getBlockPos().offset(this.structurePos);
-            ServerLevel serverlevel = (ServerLevel)this.level;
-            StructureTemplateManager structuretemplatemanager = serverlevel.getStructureManager();
+    public static boolean saveMegaStructure(ServerLevel serverLevel, ResourceLocation structureName, BlockPos blockpos,
+                            Vec3i structureSize, boolean ignoreEntities, String author, boolean writeToDisk, List<Block> ignoredBlocks) {
 
-            //The first structure template created is the header with the common metadata.
-            MegaStructureTemplate megaStructureHeaderTemplate;
+        StructureTemplateManager structuretemplatemanager = serverLevel.getStructureManager();
+
+        //The first structure template created is the header with the common metadata.
+        MegaStructureTemplate megaStructureHeaderTemplate;
+        try {
+            megaStructureHeaderTemplate = (MegaStructureTemplate) structuretemplatemanager.getOrCreate(structureName);
+        } catch (ResourceLocationException var8) {
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        //Fill the header data
+        megaStructureHeaderTemplate.fillHeaderMetaData(blockpos, structureSize, structureName);
+        megaStructureHeaderTemplate.setAuthor(author);
+        if (writeToDisk) {
             try {
-                megaStructureHeaderTemplate = (MegaStructureTemplate) structuretemplatemanager.getOrCreate(this.structureName);
-            } catch (ResourceLocationException var8) {
+                if (!structuretemplatemanager.save(structureName)){
+                    return false;
+                }
+            } catch (ResourceLocationException var7) {
                 return false;
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
+        }
 
-            //Fill the header data
-            megaStructureHeaderTemplate.fillHeaderMetaData(blockpos, structureSize, structureName);
-            megaStructureHeaderTemplate.setAuthor(this.author);
-            if (writeToDisk) {
+        BlockPos passiveCornerGlobalPosition = blockpos.offset(structureSize).offset(-1, -1, -1);
+
+        //As with the templates themselves, we will ALWAYS set the origin chunk to be the one closest to the origin:
+        BlockPos startingPos = new BlockPos(Math.min(blockpos.getX(), passiveCornerGlobalPosition.getX()), Math.min(blockpos.getY(), passiveCornerGlobalPosition.getY()), Math.min(blockpos.getZ(), passiveCornerGlobalPosition.getZ()));
+        ChunkPos startingChunk = new ChunkPos(startingPos);
+
+        for (int i = 0; i< megaStructureHeaderTemplate.getSize().getX(); i++){
+            for (int j = 0; j< megaStructureHeaderTemplate.getSize().getZ(); j++){
+
+                BlockPos chunkBlockPos = new BlockPos(startingChunk.getMinBlockX()+(16*j),startingPos.getY(),startingChunk.getMinBlockZ()+(16*i)); //maybe this + the size works¿?
+                Vec3i chunkSize = new Vec3i(16,structureSize.getY(), 16);
+                StructureTemplate chunKTemplate;
+                ResourceLocation chunKTemplateLoc =  megaStructureHeaderTemplate.getChunkLoc(j,i);
+
                 try {
-                    if (!structuretemplatemanager.save(this.structureName)){
-                        return false;
-                    }
-                } catch (ResourceLocationException var7) {
+                    chunKTemplate = structuretemplatemanager.getOrCreate(chunKTemplateLoc);
+                } catch (ResourceLocationException var8) {
                     return false;
                 } catch (Exception e) {
                     e.printStackTrace();
                     return false;
                 }
-            }
 
-            BlockPos passiveCornerGlobalPosition = blockpos.offset(structureSize).offset(-1, -1, -1);
+                chunKTemplate.fillFromWorld(serverLevel, chunkBlockPos, chunkSize, !ignoreEntities,  List.of(Blocks.STRUCTURE_VOID));//Stream.concat(List.of().stream(), Stream.of(Blocks.STRUCTURE_VOID)).toList());
+                megaStructureHeaderTemplate.setAuthor(structureName.toString());
 
-            //As with the templates themselves, we will ALWAYS set the origin chunk to be the one closest to the origin:
-            BlockPos startingPos = new BlockPos(Math.min(blockpos.getX(), passiveCornerGlobalPosition.getX()), Math.min(blockpos.getY(), passiveCornerGlobalPosition.getY()), Math.min(blockpos.getZ(), passiveCornerGlobalPosition.getZ()));
-            ChunkPos startingChunk = new ChunkPos(startingPos);
-
-            for (int i = 0; i< megaStructureHeaderTemplate.getSize().getX(); i++){
-                for (int j = 0; j< megaStructureHeaderTemplate.getSize().getZ(); j++){
-
-                    BlockPos chunkBlockPos = new BlockPos(startingChunk.getMinBlockX()+(16*j),startingPos.getY(),startingChunk.getMinBlockZ()+(16*i)); //maybe this + the size works¿?
-                    Vec3i chunkSize = new Vec3i(16,structureSize.getY(), 16);
-                    StructureTemplate chunKTemplate;
-                    ResourceLocation chunKTemplateLoc =  megaStructureHeaderTemplate.getChunkLoc(j,i);
-
+                if (writeToDisk) {
                     try {
-                        chunKTemplate = structuretemplatemanager.getOrCreate(chunKTemplateLoc);
-                    } catch (ResourceLocationException var8) {
-                        return false;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-
-                    chunKTemplate.fillFromWorld(level, chunkBlockPos, chunkSize, !ignoreEntities,  List.of(Blocks.STRUCTURE_VOID));//Stream.concat(List.of().stream(), Stream.of(Blocks.STRUCTURE_VOID)).toList());
-                    megaStructureHeaderTemplate.setAuthor(this.structureName.toString());
-
-                    if (writeToDisk) {
-                        try {
-                            if (!structuretemplatemanager.save(chunKTemplateLoc)){
-                                return false;
-                            }
-                        } catch (ResourceLocationException var7) {
-                            return false;
-                        } catch (Exception e) {
-                                    e.printStackTrace();
+                        if (!structuretemplatemanager.save(chunKTemplateLoc)){
                             return false;
                         }
+                    } catch (ResourceLocationException var7) {
+                        return false;
+                    } catch (Exception e) {
+                                e.printStackTrace();
+                        return false;
                     }
                 }
             }
-
-        return true;
         }
+        return true;
     }
 
     public static RandomSource createRandom(long seed) {
@@ -527,11 +535,13 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
         BlockPos passiveCornerGlobalPosition = blockpos.offset(structureSize).offset(-1, -1, -1);
         BlockPos startingPos = new BlockPos(Math.min(blockpos.getX(), passiveCornerGlobalPosition.getX()), Math.min(blockpos.getY(), passiveCornerGlobalPosition.getY()), Math.min(blockpos.getZ(), passiveCornerGlobalPosition.getZ()));
         ChunkPos startingChunk = new ChunkPos(startingPos);
+
         for(int i = 0; i < headerTemplate.getSize().getX(); i++) {
-            for(int j = 0; i < headerTemplate.getSize().getZ(); j++) {
+            for(int j = 0; j < headerTemplate.getSize().getZ(); j++) {
                 Optional<StructureTemplate> megaStructureChunkOpt;
                 try {
                     megaStructureChunkOpt = structuretemplatemanager.get(headerTemplate.getChunkLoc(j,i));
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -569,7 +579,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
     }
 
     public boolean isStructureLoadable() {
-        if (this.mode == MegaStructureMode.LOAD && !this.level.isClientSide && this.structureName != null) {
+        if (this.mode == MegaStructureMode.LOAD && !this.level.isClientSide() && this.structureName != null) {
             ServerLevel serverlevel = (ServerLevel)this.level;
             StructureTemplateManager structuretemplatemanager = serverlevel.getStructureManager();
 
@@ -607,6 +617,73 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
         this.showBoundingBox = showBoundingBox;
     }
 
+    @Override
+    public BoundingBoxRenderable.Mode renderMode() {
+        if (this.mode != MegaStructureMode.SAVE && this.mode != MegaStructureMode.LOAD) {
+            return BoundingBoxRenderable.Mode.NONE;
+        } else if (this.mode == MegaStructureMode.SAVE && this.showAir) {
+            return BoundingBoxRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS;
+        } else {
+            return this.mode != MegaStructureMode.SAVE && !this.showBoundingBox ? BoundingBoxRenderable.Mode.NONE : BoundingBoxRenderable.Mode.BOX;
+        }
+    }
+
+    @Override
+    public BoundingBoxRenderable.RenderableBox getRenderableBox() {
+        BlockPos blockpos = this.getStructurePos();
+        Vec3i vec3i = this.getStructureSize();
+        int i = blockpos.getX();
+        int j = blockpos.getZ();
+        int j1 = blockpos.getY();
+        int i2 = j1 + vec3i.getY();
+        int k;
+        int l;
+        switch (this.mirror) {
+            case LEFT_RIGHT:
+                k = vec3i.getX();
+                l = -vec3i.getZ();
+                break;
+            case FRONT_BACK:
+                k = -vec3i.getX();
+                l = vec3i.getZ();
+                break;
+            default:
+                k = vec3i.getX();
+                l = vec3i.getZ();
+        }
+
+        int i1;
+        int k1;
+        int l1;
+        int j2;
+        switch (this.rotation) {
+            case CLOCKWISE_90:
+                i1 = l < 0 ? i : i + 1;
+                k1 = k < 0 ? j + 1 : j;
+                l1 = i1 - l;
+                j2 = k1 + k;
+                break;
+            case CLOCKWISE_180:
+                i1 = k < 0 ? i : i + 1;
+                k1 = l < 0 ? j : j + 1;
+                l1 = i1 - k;
+                j2 = k1 - l;
+                break;
+            case COUNTERCLOCKWISE_90:
+                i1 = l < 0 ? i + 1 : i;
+                k1 = k < 0 ? j : j + 1;
+                l1 = i1 + l;
+                j2 = k1 - k;
+                break;
+            default:
+                i1 = k < 0 ? i + 1 : i;
+                k1 = l < 0 ? j + 1 : j;
+                l1 = i1 + k;
+                j2 = k1 + l;
+        }
+
+        return BoundingBoxRenderable.RenderableBox.fromCorners(i1, j1, k1, l1, i2, j2);
+    }
     public enum UpdateType implements  StringRepresentable{
         UPD8_AREA,
         SAVE_AREA,

@@ -9,22 +9,19 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 
 import static es.nullbyte.megastructureblock.Constants.MOD_ID;
 
 @EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT)
-public class ClientSideRenderEvents {
-
-//    @SubscribeEvent
-//    public static void  registerTransparency(final FMLClientSetupEvent event) {
-//        System.out.println("Registering Transparency");
-//        ItemBlockRenderTypes.setRenderLayer(ModBlockDefintions.REFINED_PILTITE.get(), RenderType.translucent());
-//    }
+public class ModClientRenderers {
 
     @SubscribeEvent
-    public static void  registerMegaStructureBB(final FMLClientSetupEvent event) {
-        BlockEntityRenderers.register((BlockEntityType<? extends MegaStructureBlockEntity>) ModBlockEntityDefintions.MEGASTRUCTURE_BLOCK_ENTITY.get(), MegaStructureBlockRenderer::new);
+    public static void onRegisterBER(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(
+                (BlockEntityType<? extends MegaStructureBlockEntity>) ModBlockEntityDefintions.MEGASTRUCTURE_BLOCK_ENTITY.get(),
+                MegaStructureBlockRenderer::new
+        );
     }
-
 }

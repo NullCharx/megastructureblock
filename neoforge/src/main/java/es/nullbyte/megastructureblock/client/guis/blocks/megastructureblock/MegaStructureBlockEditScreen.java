@@ -9,6 +9,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.StructureBlockEditScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
@@ -17,6 +20,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -165,8 +169,8 @@ public class MegaStructureBlockEditScreen extends Screen {
         }).bounds(this.width / 2 + 1 + 40 + 1 + 20, 185, 40, 20).build());
         this.nameEdit = new EditBox(this.font, this.width / 2 - 152, 40, 300, 20, Component.translatable("structure_block.structure_name")) {
             @Override
-            public boolean charTyped(char p_99476_, int p_99477_) {
-                return MegaStructureBlockEditScreen.this.isValidCharacterForName(this.getValue(), p_99476_, this.getCursorPosition()) && super.charTyped(p_99476_, p_99477_);
+            public boolean charTyped(@NotNull CharacterEvent p_445809_) {
+                return MegaStructureBlockEditScreen.this.isValidCharacterForName(this.getValue(), p_445809_.codepoint(), this.getCursorPosition()) && super.charTyped(p_445809_);
             }
         };
         this.nameEdit.setMaxLength(128);
@@ -390,14 +394,14 @@ public class MegaStructureBlockEditScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
             return true;
-        } else if (keyCode != 257 && keyCode != 335) {
-            return false;
-        } else {
+        } else if (event.isConfirmation()) {
             this.onDone();
             return true;
+        } else {
+            return false;
         }
     }
 

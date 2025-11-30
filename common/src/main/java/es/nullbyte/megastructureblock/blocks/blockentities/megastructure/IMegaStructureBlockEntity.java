@@ -7,12 +7,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BoundingBoxRenderable;
 
 
 /**
  * Common Block Entity Interface for the MegasSTructure block so that it can be safely referenced from common code.
  */
-public interface IMegaStructureBlockEntity {
+public interface IMegaStructureBlockEntity extends BoundingBoxRenderable {
 
 
     // Structure name handling

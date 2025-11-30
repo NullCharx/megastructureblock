@@ -8,164 +8,173 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShapeRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
+import org.joml.Matrix4f;
 
-public class MegaStructureBlockRenderer implements BlockEntityRenderer<MegaStructureBlockEntity> {
-    public MegaStructureBlockRenderer(BlockEntityRendererProvider.Context p_173675_) {
+public class MegaStructureBlockRenderer implements BlockEntityRenderer<MegaStructureBlockEntity, MegaStructureBlockRendererState> {
+    public MegaStructureBlockRenderer(BlockEntityRendererProvider.Context context) {
     }
 
-
-    public void render(MegaStructureBlockEntity blockEntity, float v, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int i1, Vec3 vec3) {
-        if (Minecraft.getInstance().player.canUseGameMasterBlocks() || Minecraft.getInstance().player.isSpectator()) {
-            BlockPos $$6 = blockEntity.getStructurePos();
-            Vec3i $$7 = blockEntity.getStructureSize();
-            if ($$7.getX() >= 1 && $$7.getY() >= 1 && $$7.getZ() >= 1) {
-                if (blockEntity.getMode() == MegaStructureMode.SAVE
-                || blockEntity.getMode() == MegaStructureMode.LOAD) {
-                    double $$8 = $$6.getX();
-                    double $$9 = $$6.getZ();
-                    double $$10 = $$6.getY();
-                    double $$11 = $$10 + (double)$$7.getY();
-                    double $$12;
-                    double $$13;
-                    switch (blockEntity.getMirror()) {
-                        case LEFT_RIGHT:
-                            $$12 = $$7.getX();
-                            $$13 = -$$7.getZ();
-                            break;
-                        case FRONT_BACK:
-                            $$12 = -$$7.getX();
-                            $$13 = $$7.getZ();
-                            break;
-                        default:
-                            $$12 = $$7.getX();
-                            $$13 = $$7.getZ();
-                    }
-
-                    double $$30;
-                    double $$31;
-                    double $$32;
-                    double $$33;
-                    switch (blockEntity.getRotation()) {
-                        case CLOCKWISE_90:
-                            $$30 = $$13 < (double)0.0F ? $$8 : $$8 + (double)1.0F;
-                            $$31 = $$12 < (double)0.0F ? $$9 + (double)1.0F : $$9;
-                            $$32 = $$30 - $$13;
-                            $$33 = $$31 + $$12;
-                            break;
-                        case CLOCKWISE_180:
-                            $$30 = $$12 < (double)0.0F ? $$8 : $$8 + (double)1.0F;
-                            $$31 = $$13 < (double)0.0F ? $$9 : $$9 + (double)1.0F;
-                            $$32 = $$30 - $$12;
-                            $$33 = $$31 - $$13;
-                            break;
-                        case COUNTERCLOCKWISE_90:
-                            $$30 = $$13 < (double)0.0F ? $$8 + (double)1.0F : $$8;
-                            $$31 = $$12 < (double)0.0F ? $$9 : $$9 + (double)1.0F;
-                            $$32 = $$30 + $$13;
-                            $$33 = $$31 - $$12;
-                            break;
-                        default:
-                            $$30 = $$12 < (double)0.0F ? $$8 + (double)1.0F : $$8;
-                            $$31 = $$13 < (double)0.0F ? $$9 + (double)1.0F : $$9;
-                            $$32 = $$30 + $$12;
-                            $$33 = $$31 + $$13;
-                    }
-
-                    float $$34 = 1.0F;
-                    float $$35 = 0.9F;
-                    float $$36 = 0.5F;
-                    if (blockEntity.getMode() == MegaStructureMode.SAVE|| blockEntity.getShowBoundingBox()) {
-                        VertexConsumer $$37 = multiBufferSource.getBuffer(RenderType.lines());
-                        ShapeRenderer.renderLineBox(poseStack, $$37, $$30, $$10, $$31, $$32, $$11, $$33, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
-                    }
-
-                    if (blockEntity.getMode() == MegaStructureMode.SAVE && blockEntity.getShowAir()) {
-                        this.renderInvisibleBlocks(blockEntity, multiBufferSource, poseStack);
-                    }
-
-                }
-            }
-        }
-    }
-
-    private void renderInvisibleBlocks(MegaStructureBlockEntity blockEntity, MultiBufferSource multiBufferSource, PoseStack poseStack) {
-        BlockGetter $$3 = blockEntity.getLevel();
-        VertexConsumer $$4 = multiBufferSource.getBuffer(RenderType.lines());
-        BlockPos $$5 = blockEntity.getBlockPos();
-        BlockPos $$6 = blockEntity.getBlockPos().offset(blockEntity.getStructurePos());
-
-        for(BlockPos $$7 : BlockPos.betweenClosed($$6, $$6.offset(blockEntity.getStructureSize()).offset(-1, -1, -1))) {
-            BlockState $$8 = $$3.getBlockState($$7);
-            boolean $$9 = $$8.isAir();
-            boolean $$10 = $$8.is(Blocks.STRUCTURE_VOID);
-            boolean $$11 = $$8.is(Blocks.BARRIER);
-            boolean $$12 = $$8.is(Blocks.LIGHT);
-            boolean $$13 = $$10 || $$11 || $$12;
-            if ($$9 || $$13) {
-                float $$14 = $$9 ? 0.05F : 0.0F;
-                double $$15 = (float)($$7.getX() - $$5.getX()) + 0.45F - $$14;
-                double $$16 = (float)($$7.getY() - $$5.getY()) + 0.45F - $$14;
-                double $$17 = (float)($$7.getZ() - $$5.getZ()) + 0.45F - $$14;
-                double $$18 = (float)($$7.getX() - $$5.getX()) + 0.55F + $$14;
-                double $$19 = (float)($$7.getY() - $$5.getY()) + 0.55F + $$14;
-                double $$20 = (float)($$7.getZ() - $$5.getZ()) + 0.55F + $$14;
-                if ($$9) {
-                    ShapeRenderer.renderLineBox(poseStack, $$4, $$15, $$16, $$17, $$18, $$19, $$20, 0.5F, 0.5F, 1.0F, 1.0F, 0.5F, 0.5F, 1.0F);
-                } else if ($$10) {
-                    ShapeRenderer.renderLineBox(poseStack, $$4, $$15, $$16, $$17, $$18, $$19, $$20, 1.0F, 0.75F, 0.75F, 1.0F, 1.0F, 0.75F, 0.75F);
-                } else if ($$11) {
-                    ShapeRenderer.renderLineBox(poseStack, $$4, $$15, $$16, $$17, $$18, $$19, $$20, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F);
-                } else if ($$12) {
-                    ShapeRenderer.renderLineBox(poseStack, $$4, $$15, $$16, $$17, $$18, $$19, $$20, 1.0F, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F);
-                }
-            }
-        }
-
-    }
-
-    private void renderStructureVoids(StructureBlockEntity blockEntity, BlockPos pos, Vec3i boxSize, VertexConsumer consumer, PoseStack poseStack) {
-        BlockGetter blockgetter = blockEntity.getLevel();
-        if (blockgetter != null) {
-            BlockPos blockpos = blockEntity.getBlockPos();
-            DiscreteVoxelShape discretevoxelshape = new BitSetDiscreteVoxelShape(boxSize.getX(), boxSize.getY(), boxSize.getZ());
-
-            for (BlockPos blockpos1 : BlockPos.betweenClosed(pos, pos.offset(boxSize).offset(-1, -1, -1))) {
-                if (blockgetter.getBlockState(blockpos1).is(Blocks.STRUCTURE_VOID)) {
-                    discretevoxelshape.fill(blockpos1.getX() - pos.getX(), blockpos1.getY() - pos.getY(), blockpos1.getZ() - pos.getZ());
-                }
-            }
-
-            discretevoxelshape.forAllFaces((p_397952_, p_397448_, p_397536_, p_397862_) -> {
-                float f = 0.48F;
-                float f1 = p_397448_ + pos.getX() - blockpos.getX() + 0.5F - 0.48F;
-                float f2 = p_397536_ + pos.getY() - blockpos.getY() + 0.5F - 0.48F;
-                float f3 = p_397862_ + pos.getZ() - blockpos.getZ() + 0.5F - 0.48F;
-                float f4 = p_397448_ + pos.getX() - blockpos.getX() + 0.5F + 0.48F;
-                float f5 = p_397536_ + pos.getY() - blockpos.getY() + 0.5F + 0.48F;
-                float f6 = p_397862_ + pos.getZ() - blockpos.getZ() + 0.5F + 0.48F;
-                ShapeRenderer.renderFace(poseStack, consumer, p_397952_, f1, f2, f3, f4, f5, f6, 0.75F, 0.75F, 1.0F, 0.2F);
-            });
-        }
-    }
-
-    public boolean shouldRenderOffScreen(StructureBlockEntity p_112581_) {
+    @Override
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 
-
-
+    @Override
     public int getViewDistance() {
         return 96;
     }
+
+    @Override
+    public MegaStructureBlockRendererState createRenderState() {
+        // Create the render state used to submit the block entity to the feature renderer
+        return new MegaStructureBlockRendererState();
+    }
+
+    @Override
+    public void extractRenderState(MegaStructureBlockEntity blockEntity, MegaStructureBlockRendererState renderState,
+                                   float partialTick, Vec3 cameraPos, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+
+        // Extract the necessary rendering values from the block entity to the render state
+        // Always call super or BlockEntityRenderState#extractBase
+        MegaStructureBlockRendererState.extractBase(blockEntity, renderState, crumblingOverlay);
+
+        MegaStructureBlockEntity mgst = blockEntity;
+        renderState.structurePos = mgst.getStructurePos();
+        renderState.structureSize = mgst.getStructureSize();
+        renderState.mirror = mgst.getMirror();
+        renderState.rotation = mgst.getRotation();
+        renderState.mode = mgst.getMode();
+        renderState.showBoundingBox = mgst.getShowBoundingBox();
+        renderState.showAir = mgst.getShowAir();
+        renderState.blockPos = mgst.getBlockPos();
+        renderState.level = mgst.getLevel();
+
+        // Populate any desired values
+        renderState.partialTick = partialTick;
+    }
+
+
+    @Override
+    public void submit(
+            MegaStructureBlockRendererState renderState,
+            PoseStack poseStack,
+            SubmitNodeCollector collector,
+            CameraRenderState cameraState
+    ) {
+        // Only render if player can use GM blocks or is spectator
+        if (!(Minecraft.getInstance().player.canUseGameMasterBlocks() || Minecraft.getInstance().player.isSpectator())) {
+            return;
+        }
+
+        // Validate structure size
+        Vec3i size = renderState.structureSize;
+        if (size.getX() < 1 || size.getY() < 1 || size.getZ() < 1) return;
+
+        poseStack.pushPose();
+
+        BlockPos pos = renderState.structurePos;
+        double minX = pos.getX();
+        double minY = pos.getY();
+        double minZ = pos.getZ();
+        double maxY = minY + size.getY();
+        int factor = renderState.mode == MegaStructureMode.LOAD ? 16 : 1;
+        double maxX = minX + (size.getX() * factor);
+        double maxZ = minZ + (size.getX() * factor);
+
+        // Apply mirror adjustments
+        switch (renderState.mirror) {
+            case LEFT_RIGHT -> maxZ = minZ - size.getZ();
+            case FRONT_BACK -> maxX = minX - size.getX();
+            default -> {}
+        }
+
+        // Apply rotation adjustments
+        double tMinX = minX, tMinZ = minZ, tMaxX = maxX, tMaxZ = maxZ;
+        switch (renderState.rotation) {
+            case CLOCKWISE_90 -> {
+                tMinX = maxZ < 0 ? minX : minX + 1.0;
+                tMinZ = maxX < 0 ? minZ + 1.0 : minZ;
+                tMaxX = tMinX - maxZ;
+                tMaxZ = tMinZ + maxX;
+            }
+            case CLOCKWISE_180 -> {
+                tMinX = maxX < 0 ? minX : minX + 1.0;
+                tMinZ = maxZ < 0 ? minZ : minZ + 1.0;
+                tMaxX = tMinX - maxX;
+                tMaxZ = tMinZ - maxZ;
+            }
+            case COUNTERCLOCKWISE_90 -> {
+                tMinX = maxZ < 0 ? minX + 1.0 : minX;
+                tMinZ = maxX < 0 ? minZ : minZ + 1.0;
+                tMaxX = tMinX + maxZ;
+                tMaxZ = tMinZ - maxX;
+            }
+            default -> {
+                tMinX = maxX < 0 ? minX + 1.0 : minX;
+                tMinZ = maxZ < 0 ? minZ + 1.0 : minZ;
+                tMaxX = tMinX + maxX;
+                tMaxZ = tMinZ + maxZ;
+            }
+        }
+
+        // Draw bounding box if needed
+        if (renderState.mode == MegaStructureMode.SAVE || renderState.showBoundingBox) {
+            double finalTMinX = tMinX;
+            double finalTMinZ = tMinZ;
+            double finalTMaxX = tMaxX;
+            double finalTMaxZ = tMaxZ;
+            collector.submitCustomGeometry(poseStack, RenderType.lines(), (pose, consumer) -> {
+                ShapeRenderer.renderLineBox(pose, consumer, finalTMinX, minY, finalTMinZ, finalTMaxX, maxY, finalTMaxZ, 0.9f, 0.9f, 0.9f, 1.0f, 0.5f, 0.5f, 0.5f);
+            });
+        }
+
+        // Draw invisible blocks if needed
+        if (renderState.mode == MegaStructureMode.SAVE && renderState.showAir) {
+            BlockGetter world = renderState.level;
+            BlockPos origin = renderState.blockPos.offset(pos);
+
+            collector.submitCustomGeometry(poseStack, RenderType.lines(), (pose, consumer) -> {
+                for (BlockPos p : BlockPos.betweenClosed(origin, origin.offset(size).offset(-1, -1, -1))) {
+                    BlockState state = world.getBlockState(p);
+                    float r, g, b;
+                    if (state.isAir()) { r = 0.5f; g = 0.5f; b = 1.0f; }
+                    else if (state.is(Blocks.STRUCTURE_VOID)) { r = 1.0f; g = 0.75f; b = 0.75f; }
+                    else if (state.is(Blocks.BARRIER)) { r = 1.0f; g = 0.0f; b = 0.0f; }
+                    else if (state.is(Blocks.LIGHT)) { r = 1.0f; g = 1.0f; b = 0.0f; }
+                    else continue;
+
+                    double minXb = p.getX() - renderState.blockPos.getX() + 0.45;
+                    double minYb = p.getY() - renderState.blockPos.getY() + 0.45;
+                    double minZb = p.getZ() - renderState.blockPos.getZ() + 0.45;
+                    double maxXb = p.getX() - renderState.blockPos.getX() + 0.55;
+                    double maxYb = p.getY() - renderState.blockPos.getY() + 0.55;
+                    double maxZb = p.getZ() - renderState.blockPos.getZ() + 0.55;
+
+                    ShapeRenderer.renderLineBox(pose, consumer, minXb, minYb, minZb, maxXb, maxYb, maxZb, r, g, b, 1.0f);
+                }
+            });
+        }
+
+        poseStack.popPose();
+
+    }
+
+
 }
+
