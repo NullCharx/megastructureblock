@@ -75,7 +75,7 @@ public class ModBlocks {
                         new Item.Properties()
                                 .useBlockDescriptionPrefix()
                                 .setId(ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(MOD_ID, name)))
-                                .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("block.realmsofruneterra." + name + ".tooltip")
+                                .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("block." + MOD_ID+ "." + name + ".tooltip")
                                         .withStyle(toolTipformat)))
                 )));
     }

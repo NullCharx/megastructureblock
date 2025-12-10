@@ -1,6 +1,8 @@
 plugins {
     id 'multiloader-loader'
     id 'net.neoforged.moddev'
+    id 'maven-publish'
+
 }
 
 neoForge {
@@ -65,7 +67,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = "es.nullbyte.megastructureblock"
-            artifactId = "${minecraft_version}-neoforge"
+            artifactId = "neoforge"
             version = "${version}"
         }
     }
