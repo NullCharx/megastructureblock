@@ -214,7 +214,7 @@ public class MegaStructureBlockEditScreen extends Screen {
         this.dataEdit.setValue(this.structure.getMetaData());
         this.addWidget(this.dataEdit);
         this.updateDirectionButtons();
-        this.updateMode(this.initialMode);
+        this.updateMode(this.structure.getMode());
     }
 
     @Override
@@ -240,6 +240,8 @@ public class MegaStructureBlockEditScreen extends Screen {
                 this.structure.setMode(mode);
             }
         }
+        this.updateMode(mode);
+
     }
     @Override
     public void resize(int width, int height) {
