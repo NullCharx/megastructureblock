@@ -2,6 +2,7 @@ package es.nullbyte.megastructureblock.client.guis.blocks.megastructureblock;
 import com.google.common.collect.ImmutableList;
 import es.nullbyte.megastructureblock.blocks.blockentities.MegaStructureBlockEntity;
 import es.nullbyte.megastructureblock.blocks.blockentities.megastructure.MegaStructureMode;
+import es.nullbyte.megastructureblock.blocks.megastructures.MegaStructureBlock;
 import es.nullbyte.megastructureblock.networking.packets.payloads.MegaStructureDataPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
@@ -114,12 +116,11 @@ public class MegaStructureBlockEditScreen extends Screen {
             }
         }).bounds(this.width / 2 + 4 + 100, 185, 50, 20).build());
         this.addRenderableWidget(
-                CycleButton.<MegaStructureMode>builder(megaStructureMode -> Component.translatable("megastructure_block.mode_info." + megaStructureMode.getSerializedName()),this.initialMode)
+                CycleButton.<MegaStructureMode>builder(megaStructureMode -> Component.translatable("block.megastructureblock.label.swap mode"),this.initialMode)
                         .withValues(DEFAULT_MODES, ALL_MODES)
                         .displayOnlyValue()
                         .create(this.width / 2 - 4 - 150, 185, 50, 20, Component.literal("MODE"), (p_169846_, p_169847_) -> {
-                            this.structure.setMode(p_169847_);
-                            this.updateMode(p_169847_);
+                            this.setBlockMode(p_169847_);
                         })
         );
         this.detectButton = this.addRenderableWidget(Button.builder(Component.translatable("structure_block.button.detect_size"), p_280865_ -> {
@@ -226,7 +227,20 @@ public class MegaStructureBlockEditScreen extends Screen {
         this.renderTransparentBackground(p_333749_);
     }
 
+    private void setBlockMode(MegaStructureMode mode) {
+        if (this.minecraft.level != null) {
+            BlockPos pos = this.structure.getBlockPos();
+            BlockState state = this.minecraft.level.getBlockState(pos);
 
+            if (state.getBlock() instanceof MegaStructureBlock) {
+                // Update blockstate in world, with client notification
+                this.minecraft.level.setBlock(pos, state.setValue(MegaStructureBlock.MODE, mode), 3);
+
+                // Also update block entity so UI stays in sync
+                this.structure.setMode(mode);
+            }
+        }
+    }
     @Override
     public void resize(int width, int height) {
         String s = this.nameEdit.getValue();
@@ -407,42 +421,42 @@ public class MegaStructureBlockEditScreen extends Screen {
     public void render(GuiGraphics p_281951_, int p_99407_, int p_99408_, float p_99409_) {
         super.render(p_281951_, p_99407_, p_99408_, p_99409_);
         MegaStructureMode structuremode = this.structure.getMode();
-        p_281951_.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
+        p_281951_.drawCenteredString(this.font, this.title, this.width / 2, 10, 0xFFA0A0A0);
         if (structuremode != MegaStructureMode.DATA) {
-            p_281951_.drawString(this.font, NAME_LABEL, this.width / 2 - 153, 30, 10526880);
+            p_281951_.drawString(this.font, NAME_LABEL, this.width / 2 - 153, 30, 0xFFA0A0A0);
             this.nameEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
         }
 
         if (structuremode == MegaStructureMode.LOAD || structuremode == MegaStructureMode.SAVE) {
-            p_281951_.drawString(this.font, POSITION_LABEL, this.width / 2 - 153, 70, 10526880);
+            p_281951_.drawString(this.font, POSITION_LABEL, this.width / 2 - 153, 70, 0xFFA0A0A0);
             this.posXEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
             this.posYEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
             this.posZEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
-            p_281951_.drawString(this.font, INCLUDE_ENTITIES_LABEL, this.width / 2 + 154 - this.font.width(INCLUDE_ENTITIES_LABEL), 150, 10526880);
+            p_281951_.drawString(this.font, INCLUDE_ENTITIES_LABEL, this.width / 2 + 154 - this.font.width(INCLUDE_ENTITIES_LABEL), 150, 0xFFA0A0A0);
         }
 
         if (structuremode == MegaStructureMode.SAVE) {
-            p_281951_.drawString(this.font, SIZE_LABEL, this.width / 2 - 153, 110, 10526880);
+            p_281951_.drawString(this.font, SIZE_LABEL, this.width / 2 - 153, 110, 0xFFA0A0A0);
             this.sizeXEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
             this.sizeYEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
             this.sizeZEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
-            p_281951_.drawString(this.font, DETECT_SIZE_LABEL, this.width / 2 + 154 - this.font.width(DETECT_SIZE_LABEL), 110, 10526880);
-            p_281951_.drawString(this.font, SHOW_AIR_LABEL, this.width / 2 + 154 - this.font.width(SHOW_AIR_LABEL), 70, 10526880);
+            p_281951_.drawString(this.font, DETECT_SIZE_LABEL, this.width / 2 + 154 - this.font.width(DETECT_SIZE_LABEL), 110, 0xFFA0A0A0);
+            p_281951_.drawString(this.font, SHOW_AIR_LABEL, this.width / 2 + 154 - this.font.width(SHOW_AIR_LABEL), 70, 0xFFA0A0A0);
         }
 
         if (structuremode == MegaStructureMode.LOAD) {
-            p_281951_.drawString(this.font, INTEGRITY_LABEL, this.width / 2 - 153, 110, 10526880);
+            p_281951_.drawString(this.font, INTEGRITY_LABEL, this.width / 2 - 153, 110, 0xFFA0A0A0);
             this.integrityEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
             this.seedEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
-            p_281951_.drawString(this.font, SHOW_BOUNDING_BOX_LABEL, this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 10526880);
+            p_281951_.drawString(this.font, SHOW_BOUNDING_BOX_LABEL, this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 0xFFA0A0A0);
         }
 
         if (structuremode == MegaStructureMode.DATA) {
-            p_281951_.drawString(this.font, CUSTOM_DATA_LABEL, this.width / 2 - 153, 110, 10526880);
+            p_281951_.drawString(this.font, CUSTOM_DATA_LABEL, this.width / 2 - 153, 110, 0xFFA0A0A0);
             this.dataEdit.render(p_281951_, p_99407_, p_99408_, p_99409_);
         }
 
-        p_281951_.drawString(this.font, structuremode.getDisplayName(), this.width / 2 - 153, 174, 10526880);
+        p_281951_.drawString(this.font, structuremode.getDisplayName(), this.width / 2 - 153, 174, 0xFFA0A0A0);
     }
 
     @Override

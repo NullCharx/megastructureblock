@@ -15,9 +15,9 @@ import static es.nullbyte.megastructureblock.Constants.MOD_LOGGER;
 import static net.neoforged.neoforge.common.NeoForge.EVENT_BUS;
 
 @Mod(Constants.MOD_ID)
-public class MegaStructureBlock {
+public class MegaStructureBlockMain {
 
-    public MegaStructureBlock(IEventBus modEventBus) {
+    public MegaStructureBlockMain(IEventBus modEventBus) {
 
         // This method is invoked by the NeoForge mod loader when it is ready
         // to load your mod. You can access NeoForge and Common code in this

@@ -8,5 +8,7 @@
   "megastructure_block.mode_info.load": "Modo de carga",
   "megastructure_block.mode_info.corner": "Modo delimitador primario",
   "megastructure_block.mode_info.data": "Modo de datos por defecto",
+  "block.megastructureblock.label.swap mode": "Cambiar modo"
+
 
 }

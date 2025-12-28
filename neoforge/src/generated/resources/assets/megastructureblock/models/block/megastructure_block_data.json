@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "megastructureblock:block/megastructure_block_data",
+    "east": "megastructureblock:block/megastructure_block_data",
+    "north": "megastructureblock:block/megastructure_block_data",
+    "particle": "megastructureblock:block/megastructure_block_data",
+    "south": "megastructureblock:block/megastructure_block_data",
+    "up": "megastructureblock:block/megastructure_block_data",
+    "west": "megastructureblock:block/megastructure_block_data"
+  }
+}

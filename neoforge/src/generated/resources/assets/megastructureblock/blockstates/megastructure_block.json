@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
+    "mode=autochunk_save": {
+      "model": "megastructureblock:block/megastructure_block_save"
+    },
+    "mode=corner": {
       "model": "megastructureblock:block/megastructure_block"
+    },
+    "mode=data": {
+      "model": "megastructureblock:block/megastructure_block_data"
+    },
+    "mode=load": {
+      "model": "megastructureblock:block/megastructure_block_load"
     }
   }
 }

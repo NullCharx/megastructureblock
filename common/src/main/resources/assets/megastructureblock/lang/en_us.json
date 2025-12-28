@@ -7,5 +7,6 @@
   "megastructure_block.mode_info.autochunk_save": "Auto chunk pos save mode",
   "megastructure_block.mode_info.load": "Load mode",
   "megastructure_block.mode_info.corner": "Primary delimiter mode",
-  "megastructure_block.mode_info.data": "Default data mode"
+  "megastructure_block.mode_info.data": "Default data mode",
+  "block.megastructureblock.label.swap mode": "Switch mode"
 }
