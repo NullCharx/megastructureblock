@@ -79,7 +79,7 @@ public class ModModelProvider extends ModelProvider {
 //        blockModels.blockStateOutput.accept(createSimpleBlock(MEGASTRUCTURE_BLOCK.get(), plainVariant(TexturedModel.CUBE.create(block, this.modelOutput))));
 
         // Register simple item model (use stage 1)
-        itemModels.generateFlatItem(MEGASTRUCTURE_BLOCK.get().asItem(), ModelTemplates.FLAT_ITEM);
+        itemModels.createFlatItemModel(MEGASTRUCTURE_BLOCK.get().asItem(), ModelTemplates.FLAT_ITEM);
 
     }
     /**

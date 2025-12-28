@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "megastructureblock:item/megastructure_block"
+    "model": "megastructureblock:block/megastructure_block"
   }
 }
