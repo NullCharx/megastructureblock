@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import es.nullbyte.megastructureblock.tools.AxisAlignedChunkArea;
 import net.minecraft.core.*;
 import net.minecraft.nbt.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -23,8 +23,8 @@ public class MegaStructureTemplate extends StructureTemplate {
     private String author;
     private String name;
 
-    private final LinkedHashMap<Long, ResourceLocation> subChunkReferences = new LinkedHashMap<>(); //This can
-    private ResourceLocation structureBase;
+    private final LinkedHashMap<Long, Identifier> subChunkReferences = new LinkedHashMap<>(); //This can
+    private Identifier structureBase;
     public MegaStructureTemplate() {
         this("?");
     }
@@ -53,15 +53,15 @@ public class MegaStructureTemplate extends StructureTemplate {
         return this.author;
     }
 
-    public void setStructureBase(ResourceLocation structureBase) {
+    public void setStructureBase(Identifier structureBase) {
         this.structureBase = structureBase;
     }
 
-    public ResourceLocation getStructureBase() {
+    public Identifier getStructureBase() {
         return this.structureBase;
     }
 
-    public ResourceLocation getChunkLoc (int x, int z) {
+    public Identifier getChunkLoc (int x, int z) {
         return subChunkReferences.get(ChunkPos.asLong(x, z));
     }
 
@@ -73,7 +73,7 @@ public class MegaStructureTemplate extends StructureTemplate {
      */
 
     public void fillHeaderMetaData(BlockPos activeCornerGlobalPosition, Vec3i size,
-                                                          ResourceLocation structureName) {
+                                                          Identifier structureName) {
         if (size.getX() >= 1 && size.getY() >= 1 && size.getZ() >= 1) {
             //Calculate chunks and serialize
             // Calculate the opposite corner of the bounding box (corner block)
@@ -96,7 +96,7 @@ public class MegaStructureTemplate extends StructureTemplate {
                     MegaStructureTemplate tempTemplate = new MegaStructureTemplate();
 
                     // Generate unique chunk paths
-                    ResourceLocation chunkResource = ResourceLocation.fromNamespaceAndPath(
+                    Identifier chunkResource = Identifier.fromNamespaceAndPath(
                             structureName.getNamespace(),
                             structureName.getPath() + "/chunk" + j + "_" + i
                     );
@@ -225,9 +225,9 @@ public class MegaStructureTemplate extends StructureTemplate {
             int chunkX = chunkRelativePos.getInt(0).get(); // Assuming 0th index is x
             int chunkZ = chunkRelativePos.getInt(1).get(); // Assuming 1st index is z
 
-            // Retrieve the template reference (likely a ResourceLocation)
+            // Retrieve the template reference (likely a Identifier)
             String templateReferenceStr = chunkData.getString("templateReference").get();
-            ResourceLocation templateReference = ResourceLocation.parse(templateReferenceStr); // Convert to ResourceLocation
+            Identifier templateReference = Identifier.parse(templateReferenceStr); // Convert to Identifier
             subChunkReferences.put(ChunkPos.asLong(chunkX, chunkZ), templateReference);
 //            this.templateChunkList[chunkZ][chunkX] = new MegaStructureTemplate(templateReference); // Example of how you might load the template
 

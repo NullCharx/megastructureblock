@@ -17,7 +17,7 @@ public enum MegaStructureMode implements StringRepresentable {
 
     MegaStructureMode(String name) {
         this.name = name;
-        this.displayName = Component.translatable("structure_block.mode_info." + name);
+        this.displayName = Component.translatable("megastructure_block.mode_info." + name);
     }
 
     public String getSerializedName() {

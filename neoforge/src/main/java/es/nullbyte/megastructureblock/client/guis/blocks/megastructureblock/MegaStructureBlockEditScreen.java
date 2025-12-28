@@ -114,10 +114,9 @@ public class MegaStructureBlockEditScreen extends Screen {
             }
         }).bounds(this.width / 2 + 4 + 100, 185, 50, 20).build());
         this.addRenderableWidget(
-                CycleButton.<MegaStructureMode>builder(megaStructureMode -> Component.translatable("structure_block.mode_info." + megaStructureMode.getSerializedName()))
+                CycleButton.<MegaStructureMode>builder(megaStructureMode -> Component.translatable("megastructure_block.mode_info." + megaStructureMode.getSerializedName()),this.initialMode)
                         .withValues(DEFAULT_MODES, ALL_MODES)
                         .displayOnlyValue()
-                        .withInitialValue(this.initialMode)
                         .create(this.width / 2 - 4 - 150, 185, 50, 20, Component.literal("MODE"), (p_169846_, p_169847_) -> {
                             this.structure.setMode(p_169847_);
                             this.updateMode(p_169847_);
@@ -135,10 +134,9 @@ public class MegaStructureBlockEditScreen extends Screen {
                         .create(this.width / 2 + 4 + 100, 160, 50, 20, INCLUDE_ENTITIES_LABEL, (p_169861_, p_169862_) -> this.structure.setIgnoreEntities(!p_169862_))
         );
         this.mirrorButton = this.addRenderableWidget(
-                CycleButton.builder(Mirror::symbol)
+                CycleButton.builder(Mirror::symbol,this.initialMirror)
                         .withValues(Mirror.values())
                         .displayOnlyValue()
-                        .withInitialValue(this.initialMirror)
                         .create(this.width / 2 - 20, 185, 40, 20, Component.literal("MIRROR"), (p_169843_, p_169844_) -> this.structure.setMirror(p_169844_))
         );
         this.toggleAirButton = this.addRenderableWidget(
@@ -230,7 +228,7 @@ public class MegaStructureBlockEditScreen extends Screen {
 
 
     @Override
-    public void resize(Minecraft minecraft, int width, int height) {
+    public void resize(int width, int height) {
         String s = this.nameEdit.getValue();
         String s1 = this.posXEdit.getValue();
         String s2 = this.posYEdit.getValue();
@@ -241,7 +239,7 @@ public class MegaStructureBlockEditScreen extends Screen {
         String s7 = this.integrityEdit.getValue();
         String s8 = this.seedEdit.getValue();
         String s9 = this.dataEdit.getValue();
-        this.init(minecraft, width, height);
+        this.init(width, height);
         this.nameEdit.setValue(s);
         this.posXEdit.setValue(s1);
         this.posYEdit.setValue(s2);

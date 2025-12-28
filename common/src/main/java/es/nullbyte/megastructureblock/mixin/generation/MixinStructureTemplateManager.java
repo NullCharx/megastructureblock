@@ -5,7 +5,7 @@ import es.nullbyte.megastructureblock.worldgen.structures.megastructure.template
 import net.minecraft.core.HolderGetter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -29,7 +29,7 @@ public class MixinStructureTemplateManager {
     @Mutable @Shadow @Final
     private DataFixer fixerUpper;
     @Mutable @Shadow @Final
-    private Map<ResourceLocation, Optional<StructureTemplate>> structureRepository;
+    private Map<Identifier, Optional<StructureTemplate>> structureRepository;
 
 //Test the miin, If it doesnt work then you have to diwncast  everything coming from th template manager
 
@@ -62,12 +62,12 @@ public class MixinStructureTemplateManager {
      * of its name (after the namespace). This behavior aligns with the expected naming convention
      * used by MegaStructure blocks/entities.
      *
-     * @param id  The `ResourceLocation` of the structure being retrieved or created.
+     * @param id  The `Identifier` of the structure being retrieved or created.
      * @param cir The callback info for modifying the return value.
      */
     @Inject(method = "getOrCreate", at = @At(value = "NEW",target = "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;"),
             cancellable = true)
-    private void onGetOrCreate(ResourceLocation id, CallbackInfoReturnable<StructureTemplate> cir) {
+    private void onGetOrCreate(Identifier id, CallbackInfoReturnable<StructureTemplate> cir) {
         String path = id.getPath();
         if (path.startsWith("mgst_") && !path.contains("/")) {
             // Replace the StructureTemplate with a subclass
@@ -79,21 +79,21 @@ public class MixinStructureTemplateManager {
     }
 
     @Inject (method = "tryLoad", at = @At(value = "RETURN", ordinal = 0), cancellable = true)
-    private void onTryLoading(ResourceLocation id, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
+    private void onTryLoading(Identifier id, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
         if(cir.getReturnValue().get() instanceof MegaStructureTemplate) {
             cir.setReturnValue(Optional.of(cir.getReturnValue().get()));
         }
     }
 
     @Inject (method = "loadFromResource", at = @At(value = "RETURN", ordinal = 0), cancellable = true)
-    private void onLoadingFromResource(ResourceLocation id, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
+    private void onLoadingFromResource(Identifier id, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
         if(cir.getReturnValue().get() instanceof MegaStructureTemplate) {
             cir.setReturnValue(Optional.of(cir.getReturnValue().get()));
         }
     }
 
     @Inject (method = "loadFromTestStructures", at = @At(value = "RETURN", ordinal = 0), cancellable = true)
-    private void onLoadingFromTestStructure(ResourceLocation id, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
+    private void onLoadingFromTestStructure(Identifier id, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
         if(cir.getReturnValue().isPresent() && cir.getReturnValue().get() instanceof MegaStructureTemplate) {
             cir.setReturnValue(Optional.of(cir.getReturnValue().get()));
         }
@@ -101,14 +101,14 @@ public class MixinStructureTemplateManager {
 
 
     @Inject (method = "loadFromGenerated", at = @At(value = "RETURN"), cancellable = true)
-    private void onLoadingFromGenerated(ResourceLocation id, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
+    private void onLoadingFromGenerated(Identifier id, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
         if(cir.getReturnValue().isPresent() && cir.getReturnValue().get() instanceof MegaStructureTemplate) {
             cir.setReturnValue(Optional.of(cir.getReturnValue().get()));
         }
     }
 
     @Inject (method = "loadFromSnbt", at = @At(value = "RETURN", ordinal = 1), cancellable = true)
-    private void onLoadingFromSnbt(ResourceLocation id, Path path, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
+    private void onLoadingFromSnbt(Identifier id, Path path, CallbackInfoReturnable<Optional<MegaStructureTemplate>> cir) {
         if(cir.getReturnValue().isPresent() && cir.getReturnValue().get() instanceof MegaStructureTemplate) {
             cir.setReturnValue(Optional.of(cir.getReturnValue().get()));
         }

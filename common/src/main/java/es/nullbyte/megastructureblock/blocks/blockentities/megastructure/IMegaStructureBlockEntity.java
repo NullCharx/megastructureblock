@@ -2,7 +2,7 @@ package es.nullbyte.megastructureblock.blocks.blockentities.megastructure;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Mirror;
@@ -20,7 +20,7 @@ public interface IMegaStructureBlockEntity extends BoundingBoxRenderable {
     String getStructureName();
     boolean hasStructureName();
     void setStructureName(String structureName);
-    void setStructureName(ResourceLocation structureName);
+    void setStructureName(Identifier structureName);
 
     // Author
     void createdBy(LivingEntity author);

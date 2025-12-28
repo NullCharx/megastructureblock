@@ -7,14 +7,14 @@ import es.nullbyte.megastructureblock.blocks.blockentities.megastructure.MegaStr
 import es.nullbyte.megastructureblock.blocks.megastructures.MegaStructureBlock;
 import es.nullbyte.megastructureblock.client.guis.ClientScreens;
 import es.nullbyte.megastructureblock.worldgen.structures.megastructure.templatesystem.MegaStructureTemplate;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.Util;
+import net.minecraft.IdentifierException;
+import net.minecraft.util.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -62,7 +62,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
     private static final Mirror DEFAULT_MIRROR = Mirror.NONE;
 
     @Nullable
-    private ResourceLocation structureName;
+    private Identifier structureName;
     private String author = "";
     private String metaData = "";
     private BlockPos structurePos = DEFAULT_POS;
@@ -186,7 +186,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
     }
 
     public void setStructureName(@Nullable String structureName) {
-        this.setStructureName(StringUtil.isNullOrEmpty(structureName) ? null : ResourceLocation.tryParse(parseMegaStructureName(structureName)));
+        this.setStructureName(StringUtil.isNullOrEmpty(structureName) ? null : Identifier.tryParse(parseMegaStructureName(structureName)));
     }
 
     private String parseMegaStructureName(@Nullable String structureName) {
@@ -214,7 +214,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
         return structureName;
     }
 
-    public void setStructureName(@Nullable ResourceLocation structureName) {
+    public void setStructureName(@Nullable Identifier structureName) {
         this.structureName = structureName;
     }
 
@@ -398,7 +398,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
      * Here we do not care about the logic of positioning the megastructure in the world. Here we just need to
      * serialize the megastructure into constitutent chunks.
      */
-    public static boolean saveMegaStructure(ServerLevel serverLevel, ResourceLocation structureName, BlockPos blockpos,
+    public static boolean saveMegaStructure(ServerLevel serverLevel, Identifier structureName, BlockPos blockpos,
                             Vec3i structureSize, boolean ignoreEntities, String author, boolean writeToDisk, List<Block> ignoredBlocks) {
 
         StructureTemplateManager structuretemplatemanager = serverLevel.getStructureManager();
@@ -407,7 +407,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
         MegaStructureTemplate megaStructureHeaderTemplate;
         try {
             megaStructureHeaderTemplate = (MegaStructureTemplate) structuretemplatemanager.getOrCreate(structureName);
-        } catch (ResourceLocationException var8) {
+        } catch (IdentifierException var8) {
             return false;
         } catch (Exception e) {
             e.printStackTrace();
@@ -422,7 +422,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
                 if (!structuretemplatemanager.save(structureName)){
                     return false;
                 }
-            } catch (ResourceLocationException var7) {
+            } catch (IdentifierException var7) {
                 return false;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -442,11 +442,11 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
                 BlockPos chunkBlockPos = new BlockPos(startingChunk.getMinBlockX()+(16*j),startingPos.getY(),startingChunk.getMinBlockZ()+(16*i)); //maybe this + the size works¿?
                 Vec3i chunkSize = new Vec3i(16,structureSize.getY(), 16);
                 StructureTemplate chunKTemplate;
-                ResourceLocation chunKTemplateLoc =  megaStructureHeaderTemplate.getChunkLoc(j,i);
+                Identifier chunKTemplateLoc =  megaStructureHeaderTemplate.getChunkLoc(j,i);
 
                 try {
                     chunKTemplate = structuretemplatemanager.getOrCreate(chunKTemplateLoc);
-                } catch (ResourceLocationException var8) {
+                } catch (IdentifierException var8) {
                     return false;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -461,7 +461,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
                         if (!structuretemplatemanager.save(chunKTemplateLoc)){
                             return false;
                         }
-                    } catch (ResourceLocationException var7) {
+                    } catch (IdentifierException var7) {
                         return false;
                     } catch (Exception e) {
                                 e.printStackTrace();
@@ -585,7 +585,7 @@ public class MegaStructureBlockEntity extends BlockEntity implements IMegaStruct
 
             try {
                 return structuretemplatemanager.get(this.structureName).isPresent();
-            } catch (ResourceLocationException var4) {
+            } catch (IdentifierException var4) {
                 return false;
             }
         } else {

@@ -15,7 +15,7 @@ public class ModItems {
     static {
 
         //initHexPrototype(ITEMS.register("hexporter_prototype",
-         //       () -> new ProtoHexPorter(new Item.Properties().useItemDescriptionPrefix().setId(ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(MOD_ID,  "hexporter_prototype"))))));
+         //       () -> new ProtoHexPorter(new Item.Properties().useItemDescriptionPrefix().setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,  "hexporter_prototype"))))));
     }
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

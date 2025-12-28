@@ -44,6 +44,7 @@ public class MegaStructureBlockRendererState extends BlockEntityRenderState {
 
 
 
+
     /** Returns the axis-aligned bounding box for the structure, transformed by mirror and rotation */
     public AABB getTransformedBox() {
         double minX = structurePos.getX();

@@ -7,7 +7,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemLore;
@@ -35,7 +35,7 @@ public class ModBlocks {
 
         initMegaStructureBlock(registerBlock("megastructure_block",
                 () -> new MegaStructureBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRUCTURE_BLOCK)
-                        .setId(ResourceKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(MOD_ID,"megastructure_block")))
+                        .setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(MOD_ID,"megastructure_block")))
                 )
         ));
 
@@ -74,7 +74,7 @@ public class ModBlocks {
                 new BlockItem(block.get(),
                         new Item.Properties()
                                 .useBlockDescriptionPrefix()
-                                .setId(ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(MOD_ID, name)))
+                                .setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID, name)))
                                 .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("block." + MOD_ID+ "." + name + ".tooltip")
                                         .withStyle(toolTipformat)))
                 )));

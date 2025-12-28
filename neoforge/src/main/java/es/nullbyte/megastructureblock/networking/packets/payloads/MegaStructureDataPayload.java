@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -39,7 +39,7 @@ public record MegaStructureDataPayload(
         float integrity,
         long seed
 ) implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<MegaStructureDataPayload> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(MOD_ID, "megasturcture_data_payload"));
+    public static final CustomPacketPayload.Type<MegaStructureDataPayload> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(MOD_ID, "megasturcture_data_payload"));
     private static final int FLAG_IGNORE_ENTITIES = 1;
     private static final int FLAG_SHOW_AIR = 2;
     private static final int FLAG_SHOW_BOUNDING_BOX = 4;

@@ -6,7 +6,7 @@ import es.nullbyte.megastructureblock.blocks.blockentities.MegaStructureBlockEnt
 import es.nullbyte.megastructureblock.blocks.blockentities.megastructure.MegaStructureMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -16,8 +16,10 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.gizmos.GizmoStyle;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -25,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 import org.joml.Matrix4f;
-
+import net.minecraft.gizmos.Gizmos;
 public class MegaStructureBlockRenderer implements BlockEntityRenderer<MegaStructureBlockEntity, MegaStructureBlockRendererState> {
     public MegaStructureBlockRenderer(BlockEntityRendererProvider.Context context) {
     }
@@ -37,7 +39,7 @@ public class MegaStructureBlockRenderer implements BlockEntityRenderer<MegaStruc
 
     @Override
     public int getViewDistance() {
-        return 96;
+        return 200;
     }
 
     @Override
@@ -78,102 +80,122 @@ public class MegaStructureBlockRenderer implements BlockEntityRenderer<MegaStruc
             CameraRenderState cameraState
     ) {
         // Only render if player can use GM blocks or is spectator
-        if (!(Minecraft.getInstance().player.canUseGameMasterBlocks() || Minecraft.getInstance().player.isSpectator())) {
+        if (!(Minecraft.getInstance().player.canUseGameMasterBlocks()
+                || Minecraft.getInstance().player.isSpectator())) {
             return;
         }
 
-        // Validate structure size
         Vec3i size = renderState.structureSize;
         if (size.getX() < 1 || size.getY() < 1 || size.getZ() < 1) return;
 
         poseStack.pushPose();
 
-        BlockPos pos = renderState.structurePos;
-        double minX = pos.getX();
-        double minY = pos.getY();
-        double minZ = pos.getZ();
-        double maxY = minY + size.getY();
-        int factor = renderState.mode == MegaStructureMode.LOAD ? 16 : 1;
-        double maxX = minX + (size.getX() * factor);
-        double maxZ = minZ + (size.getX() * factor);
+        /* ------------------------------------------------------------
+         * Base position (world-space, block-aligned)
+         * ------------------------------------------------------------ */
+        BlockPos base = renderState.blockPos.offset(renderState.structurePos);
 
-        // Apply mirror adjustments
-        switch (renderState.mirror) {
-            case LEFT_RIGHT -> maxZ = minZ - size.getZ();
-            case FRONT_BACK -> maxX = minX - size.getX();
-            default -> {}
+        double minX = base.getX();
+        double minY = base.getY();
+        double minZ = base.getZ();
+
+        double maxY = minY + size.getY();
+
+        int factor = renderState.mode == MegaStructureMode.LOAD ? 16 : 1;
+
+        /* ------------------------------------------------------------
+         * EXTENTS (this is the critical fix)
+         * ------------------------------------------------------------ */
+        double dx = size.getX() * factor;
+        double dz = size.getZ() * factor;
+
+        /* ------------------------------------------------------------
+         * Mirror (affects extents sign only)
+         * ------------------------------------------------------------ */
+        if (renderState.mirror == Mirror.LEFT_RIGHT) {
+            dz = -dz;
+        } else if (renderState.mirror == Mirror.FRONT_BACK) {
+            dx = -dx;
         }
 
-        // Apply rotation adjustments
-        double tMinX = minX, tMinZ = minZ, tMaxX = maxX, tMaxZ = maxZ;
+        /* ------------------------------------------------------------
+         * Rotation (rotate EXTENTS, not world coordinates)
+         * ------------------------------------------------------------ */
+        double rdx = dx;
+        double rdz = dz;
+
         switch (renderState.rotation) {
             case CLOCKWISE_90 -> {
-                tMinX = maxZ < 0 ? minX : minX + 1.0;
-                tMinZ = maxX < 0 ? minZ + 1.0 : minZ;
-                tMaxX = tMinX - maxZ;
-                tMaxZ = tMinZ + maxX;
+                rdx = -dz;
+                rdz = dx;
             }
             case CLOCKWISE_180 -> {
-                tMinX = maxX < 0 ? minX : minX + 1.0;
-                tMinZ = maxZ < 0 ? minZ : minZ + 1.0;
-                tMaxX = tMinX - maxX;
-                tMaxZ = tMinZ - maxZ;
+                rdx = -dx;
+                rdz = -dz;
             }
             case COUNTERCLOCKWISE_90 -> {
-                tMinX = maxZ < 0 ? minX + 1.0 : minX;
-                tMinZ = maxX < 0 ? minZ : minZ + 1.0;
-                tMaxX = tMinX + maxZ;
-                tMaxZ = tMinZ - maxX;
+                rdx = dz;
+                rdz = -dx;
             }
             default -> {
-                tMinX = maxX < 0 ? minX + 1.0 : minX;
-                tMinZ = maxZ < 0 ? minZ + 1.0 : minZ;
-                tMaxX = tMinX + maxX;
-                tMaxZ = tMinZ + maxZ;
+                // NONE
             }
         }
 
-        // Draw bounding box if needed
+        /* ------------------------------------------------------------
+         * Rebuild AABB safely
+         * ------------------------------------------------------------ */
+        double maxX = minX + rdx;
+        double maxZ = minZ + rdz;
+
+        AABB structureBox = new AABB(
+                Math.min(minX, maxX),
+                minY,
+                Math.min(minZ, maxZ),
+                Math.max(minX, maxX),
+                maxY,
+                Math.max(minZ, maxZ)
+        );
+
+        /* ------------------------------------------------------------
+         * Render structure bounding box
+         * ------------------------------------------------------------ */
         if (renderState.mode == MegaStructureMode.SAVE || renderState.showBoundingBox) {
-            double finalTMinX = tMinX;
-            double finalTMinZ = tMinZ;
-            double finalTMaxX = tMaxX;
-            double finalTMaxZ = tMaxZ;
-            collector.submitCustomGeometry(poseStack, RenderType.lines(), (pose, consumer) -> {
-                ShapeRenderer.renderLineBox(pose, consumer, finalTMinX, minY, finalTMinZ, finalTMaxX, maxY, finalTMaxZ, 0.9f, 0.9f, 0.9f, 1.0f, 0.5f, 0.5f, 0.5f);
-            });
+            Gizmos.cuboid(
+                    structureBox,
+                    GizmoStyle.stroke(0xE5E5E5FF)
+            ).setAlwaysOnTop();
         }
 
-        // Draw invisible blocks if needed
+        /* ------------------------------------------------------------
+         * Render invisible blocks (air / void / barrier / light)
+         * ------------------------------------------------------------ */
         if (renderState.mode == MegaStructureMode.SAVE && renderState.showAir) {
-            BlockGetter world = renderState.level;
-            BlockPos origin = renderState.blockPos.offset(pos);
+            BlockGetter level = renderState.level;
 
-            collector.submitCustomGeometry(poseStack, RenderType.lines(), (pose, consumer) -> {
-                for (BlockPos p : BlockPos.betweenClosed(origin, origin.offset(size).offset(-1, -1, -1))) {
-                    BlockState state = world.getBlockState(p);
-                    float r, g, b;
-                    if (state.isAir()) { r = 0.5f; g = 0.5f; b = 1.0f; }
-                    else if (state.is(Blocks.STRUCTURE_VOID)) { r = 1.0f; g = 0.75f; b = 0.75f; }
-                    else if (state.is(Blocks.BARRIER)) { r = 1.0f; g = 0.0f; b = 0.0f; }
-                    else if (state.is(Blocks.LIGHT)) { r = 1.0f; g = 1.0f; b = 0.0f; }
-                    else continue;
+            for (BlockPos p : BlockPos.betweenClosed(
+                    base,
+                    base.offset(size).offset(-1, -1, -1)
+            )) {
+                BlockState state = level.getBlockState(p);
 
-                    double minXb = p.getX() - renderState.blockPos.getX() + 0.45;
-                    double minYb = p.getY() - renderState.blockPos.getY() + 0.45;
-                    double minZb = p.getZ() - renderState.blockPos.getZ() + 0.45;
-                    double maxXb = p.getX() - renderState.blockPos.getX() + 0.55;
-                    double maxYb = p.getY() - renderState.blockPos.getY() + 0.55;
-                    double maxZb = p.getZ() - renderState.blockPos.getZ() + 0.55;
+                int color;
+                if (state.isAir()) color = 0x8080FFFF;
+                else if (state.is(Blocks.STRUCTURE_VOID)) color = 0xFFBFBFFF;
+                else if (state.is(Blocks.BARRIER)) color = 0xFF0000FF;
+                else if (state.is(Blocks.LIGHT)) color = 0xFFFF00FF;
+                else continue;
 
-                    ShapeRenderer.renderLineBox(pose, consumer, minXb, minYb, minZb, maxXb, maxYb, maxZb, r, g, b, 1.0f);
-                }
-            });
+                Gizmos.cuboid(
+                        new AABB(p).inflate(0.05),
+                        GizmoStyle.stroke(color, 1.0f)
+                );
+            }
         }
 
         poseStack.popPose();
-
     }
+
 
 
 }
